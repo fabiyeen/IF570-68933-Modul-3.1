@@ -73,4 +73,7 @@ class MainViewModel @Inject constructor(
 
     val suggestedDestinations: StateFlow<List<ExploreModel>> = _suggestedDestinations.asStateFlow()
 
+    init {
+        _suggestedDestinations.value = destinationsRepository.destinations
+    }
 }
