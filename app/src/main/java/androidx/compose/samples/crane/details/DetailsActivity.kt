@@ -61,6 +61,7 @@ import com.google.maps.android.ktx.addMarker
 import com.google.maps.android.ktx.awaitMap
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.produceState
 
 internal const val KEY_ARG_DETAILS_CITY_NAME = "KEY_ARG_DETAILS_CITY_NAME"
 
@@ -102,12 +103,15 @@ fun DetailsScreen(
     modifier: Modifier = Modifier,
     viewModel: DetailsViewModel = viewModel()
 ) {
-    // TODO Codelab: produceState step - Show loading screen while fetching city details
-    val cityDetails = remember(viewModel) { viewModel.cityDetails }
-    if (cityDetails is Result.Success<ExploreModel>) {
-        DetailsContent(cityDetails.data, modifier.fillMaxSize())
-    } else {
-        onErrorLoading()
+    val uiState by produceState(initialValue = DetailsUiState(isLoading = true)) {
+        // In a coroutine, this can call suspend functions or move
+        // the computation to different Dispatchers
+        val cityDetailsResult = viewModel.cityDetails
+        value = if (cityDetailsResult is Result.Success<ExploreModel>) {
+            DetailsUiState(cityDetailsResult.data)
+        } else {
+            DetailsUiState(throwError = true)
+        }
     }
 }
 
